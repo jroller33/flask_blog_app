@@ -12,6 +12,7 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     
     app.config.from_mapping(
+        # SECRET_KEY should be changed before deploying
         SECRET_KEY='dev',
         DATABASE=os.path.join(app.instance_path, 'blog.sqlite'),    # path for DB
     )
@@ -30,6 +31,7 @@ def create_app(test_config=None):
         pass
     
     # route that says hello
+    # http://127.0.0.1:5000/hello
     @app.route('/hello')
     def hello():
         return 'sup'
