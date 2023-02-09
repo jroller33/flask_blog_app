@@ -15,7 +15,7 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
 # runs before the view function, no matter the URL.
-# load_logged_in_user() checks if user id is stored in session, gets it from the db and stores it in g.user
+# load_logged_in_user() checks if user id is stored in session, gets it from the db and stores it in g.user for the length of the request
 @bp.before_app_request
 def load_logged_in_user():
     user_id = session.get('user_id')
@@ -27,7 +27,11 @@ def load_logged_in_user():
             'SELECT * FROM user WHERE id = ?', (user_id,)
         ).fetchone()
 
-
+# to logout, remove user_id from session. then load_logged_in_user() won't load a user on subsequent requests
+@bp.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
 
 
 # register() is a view function. when Flask receives a req to '/auth/register', it calls the register view and uses the return value as the response
