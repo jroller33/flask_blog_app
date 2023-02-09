@@ -14,6 +14,20 @@ from app.db import get_db
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
+# this decorator returns a new view function that wraps the original view. checks if user is logged in and redirects to login page if not.
+# if user is loaded the original view is called and continues. This will be used for writing the blog views.
+def login_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user is None:
+            return redirect(url_for('auth.login'))
+        
+        return view(**kwargs)
+    
+    return wrapped_view
+
+
+
 # runs before the view function, no matter the URL.
 # load_logged_in_user() checks if user id is stored in session, gets it from the db and stores it in g.user for the length of the request
 @bp.before_app_request
