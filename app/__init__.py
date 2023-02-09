@@ -14,7 +14,7 @@ def create_app(test_config=None):
     app.config.from_mapping(
         # SECRET_KEY should be changed before deploying
         SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'blog.sqlite'),    # path for DB
+        DATABASE=os.path.join(app.instance_path, 'app.sqlite'),    # path for DB
     )
     
     if test_config is None:
