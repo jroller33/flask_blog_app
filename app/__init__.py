@@ -36,4 +36,8 @@ def create_app(test_config=None):
     def hello():
         return 'sup'
     
+    
+    from . import db
+    db.init_app(app)
+    
     return app
