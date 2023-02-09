@@ -14,11 +14,25 @@ from app.db import get_db
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
+# runs before the view function, no matter the URL.
+# load_logged_in_user() checks if user id is stored in session, gets it from the db and stores it in g.user
+@bp.before_app_request
+def load_logged_in_user():
+    user_id = session.get('user_id')
 
+    if user_id is None:
+        g.user = None
+    else:
+        g.user = get_db().execute(
+            'SELECT * FROM user WHERE id = ?', (user_id,)
+        ).fetchone()
+
+
+
+
+# register() is a view function. when Flask receives a req to '/auth/register', it calls the register view and uses the return value as the response
 @bp.route('/register', methods=('GET', 'POST'))
 def register():
-# register() is a view function. when Flask receives a req to '/auth/register', it calls the register view and uses the return value as the response
-    
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -30,9 +44,8 @@ def register():
         elif not password:
             error = 'Password is required.'
 
-# if user's input was valid, insert new data into db
-# never store passwords directly into db, use generate_password_hash() to hash the pw, then store the hash. db.commit() saves changes afterwards
-
+        # if user's input was valid, insert new data into db
+        # never store passwords directly into db, use generate_password_hash() to hash the pw, then store the hash. db.commit() saves changes afterwards
         if error is None:
             try:
                 db.execute(
@@ -50,3 +63,32 @@ def register():
     return render_template('auth/register.html')
 
 
+# login() view function. /auth/login
+@bp.route('/login', methods=('GET', 'POST'))
+def login():
+    
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        db = get_db()
+        error = None
+        user = db.execute(
+            'SELECT * FROM user WHERE username = ?', (username,)
+        ).fetchone()
+
+        if user is None:
+            error = 'Incorrect username.'
+            
+        elif not check_password_hash(user['password'], password):
+            error = 'Incorrect password.'
+
+        # session is a dict that stores data across requests. if validation succeeds, the user's `id` is stored in a new session
+        # data is stored in a cookie sent to the browser, and browser sends it back with subsequent requests. cookie gets signed by flask for verification
+        if error is None:
+            session.clear()
+            session['user_id'] = user['id']
+            return redirect(url_for('index'))
+
+        flash(error)
+
+    return render_template('auth/login.html')
