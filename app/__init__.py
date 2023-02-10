@@ -36,6 +36,8 @@ def create_app(test_config=None):
     
     # route that says hello
     # http://127.0.0.1:5000/hello
+    # if you put two routes on the same function, it will respond to both
+    @app.route('/')
     @app.route('/hello')
     def hello():
         return 'sup'
