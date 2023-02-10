@@ -1,9 +1,5 @@
 # __init__.py does two things: contains Application Factory and tells python that the 'app/' folder should be treated as a package.
 
-
-# https://flask.palletsprojects.com/en/2.2.x/tutorial/views/
-# ending right before endpoints and URLS
-
 import os
 
 from flask import Flask
